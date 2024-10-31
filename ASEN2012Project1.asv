@@ -50,11 +50,4 @@ y_B =@(t) y0_B + v_B*t;
 
 distance = sqrt((x_B(t_ca) - x_A(t_ca))^2 + (y_B(t_ca) - y_A(t_ca))^2); %Distance in nmi
 
-%% Error Propagation in time of closest approach
-
-
-
-
-
-
 
