@@ -39,13 +39,15 @@ t_ca = ( -(x0_B-x0_A)*(u_B-u_A)-(y0_B-y0_A)*(v_B-v_A) ) / ( (u_B-u_A)^(2)+(v_B-v
 %% aircraft motion models
 t = 1:1000;
 
-x_A = x0_A + u_A*t;
-y_A = y0_A + v_A*t;
+x_A =@(t) x0_A + u_A*t;
+y_A =@(t) y0_A + v_A*t;
 
-x_B = x0_B + u_B*t;
-y_B = y0_B + v_B*t;
+x_B =@(t) x0_B + u_B*t;
+y_B =@(t) y0_B + v_B*t;
 
 
 %% using motion models for distance equation
 
 distance = sqrt((x_B(t_ca) - x_A(t_ca))^2 + (y_B(t_ca) - y_A(t_ca))^2);
+
+
