@@ -1,20 +1,46 @@
-% Project 1 ASEN 2012
+%% Project 1 ASEN 2012
 clc;
 clear;
 close all;
+
 
 %% Read in  data files
 % in form Time(s), X(nmi), Y(nmi)
 rawdata_A = readmatrix("Data_TCAS_A.csv");
 rawdata_B = readmatrix("Data_TCAS_B.csv");
 
+
+%% Plot the two on the same graph, without respect to time
+
+figure(1);
+plot(rawdata_A(:,2),rawdata_A(:,3));
+hold on;
+plot(rawdata_B(:,2),rawdata_B(:,3));
+
+% fit line to data A
+[d,S] = polyfit(rawdata_A(:,2),rawdata_A(:,3),1);
+eq_A = @(x) d(1)*x+d(2);
+x = linspace(rawdata_A(1,2),rawdata_A(length(rawdata_A),2),100);
+plot(x,eq_A(x));
+
+%fit line to data B
+[e,T] = polyfit(rawdata_B(:,2),rawdata_B(:,3),1);
+eq_B = @(x) e(1)*x+e(2);
+x = linspace(rawdata_B(1,2),rawdata_B(length(rawdata_A),2),100);
+plot(x,eq_B(x));
+
+
 %% find the fit lines for each aircraft, in x and y (4 lines)
+
 [a] = polyfit(rawdata_A(:,1),rawdata_A(:,2),1); % x
 [b] = polyfit(rawdata_A(:,1),rawdata_A(:,3),1); % y
 
 [c] = polyfit(rawdata_B(:,1),rawdata_B(:,2),1); % x
 [d] = polyfit(rawdata_B(:,1),rawdata_B(:,3),1); % y
+
+
 %% Assign the variables of the distance equation
+
 u_A = a(1);
 x0_A = a(2);
 
@@ -28,15 +54,13 @@ v_B = d(1);
 y0_B = d(2);
 
 
-
-
 %% Use the derived closest approach equation to find time of closest approach
 
 t_ca = ( -(x0_B-x0_A)*(u_B-u_A)-(y0_B-y0_A)*(v_B-v_A) ) / ( (u_B-u_A)^(2)+(v_B-v_A)^(2) );
 
 
-
 %% aircraft motion models
+
 t = 1:1000;
 
 x_A =@(t) x0_A + u_A*t;
@@ -49,6 +73,7 @@ y_B =@(t) y0_B + v_B*t;
 %% using motion models for distance equation
 
 distance = sqrt((x_B(t_ca) - x_A(t_ca))^2 + (y_B(t_ca) - y_A(t_ca))^2); %Distance in nmi
+
 
 %% Error Propagation in time of closest approach
 
