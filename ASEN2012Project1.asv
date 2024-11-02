@@ -73,17 +73,42 @@ time_a = rawdata_a(:, 1);
 xi_a = rawdata_a(:,2);
 yi_a = rawdata_a(:,3);
 N_a = length(time_a);
+delta_a = N_a * sum(time_a.^2) - (sum(time_a))^2;
 
 time_b = rawdata_b(:, 1);
 xi_b = rawdata_b(:,2);
 yi_b = rawdata_b(:,3);
 N_b = length(time_b);
+delta_b = N_b * sum(time_b.^2) - (sum(time_b))^2;
 
 
+sigma_y_a = sqrt((1/(N_a - 2)) * sum((yi_a - fit_a(2) - fit_a(1) * xi_a).^2));
+sigma_y_b = sqrt((1/(N_b - 2)) * sum((yi_b - fit_b(2) - fit_b(1) * xi_b).^2));
 
 
-sigma_y = sqrt((1/(length(rawdata_a) - 2)) * sum((rawdata_a(:,3) - fit_a(2) - fit_a(1)*rawdata_a(:,2)).^2));
-N = length(t);
-Delta = N * sum(t.^2) - (sum(t))^2;
-sigma_X_A0 = sigma_y * sqrt(sum(t.^2) / Delta);
+sigma_x0_a = sigma_y_a * sqrt((sum(time_a))/delta_a);
+sigma_y0_a = sigma_y_a * sqrt((sum(time_a))/delta_a);
+sigma_u_a = sigma_y_a * sqrt(N_a / delta_a);
+sigma_v_a = sigma_y_a * sqrt(N_a / delta_a);
 
+sigma_x0_b = sigma_y_b * sqrt((sum(time_b))/delta_b);
+sigma_y0_b = sigma_y_b * sqrt((sum(time_b))/delta_b);
+sigma_u_b = sigma_y_b * sqrt(N_b / delta_b);
+sigma_v_b = sigma_y_b * sqrt(N_b / delta_b);
+
+partial_x0_a = 
+
+%general method
+%% Partial derivatives for error propagation
+partial_x0_a = (u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
+partial_y0_a = (v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
+partial_u_a = (x0_b - x0_a) * (2 * (u_b - u_a)) + (y0_b - y0_a) * (v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+partial_v_a = (y0_b - y0_a) * (2 * (v_b - v_a)) + (x0_b - x0_a) * (u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+
+partial_x0_b = -(u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
+partial_y0_b = -(v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
+partial_u_b = (-(x0_b - x0_a) * (2 * (u_b - u_a)) - (y0_b - y0_a) * (v_b - v_a)) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+partial_v_b = (-(y0_b - y0_a) * (2 * (v_b - v_a)) - (x0_b - x0_a) * (u_b - u_a)) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+
+%% General method for combined uncertainty
+combined_uncertainty = sqrt((partial_x0_a * sigma_x0_a)^2 + (partial_y0_a * sigma_y0_a)^2 + (partial_u_a * sigma_u_a)^2 + (partial_v_a * sigma_v_a)^2 + (partial_x0_b * sigma_x0_b)^2 + (partial_y0_b * sigma_y0_b)^2 + (partial_u_b * sigma_u_b)^2 + (partial_v_b * sigma_v_b)^2);

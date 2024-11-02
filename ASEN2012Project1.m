@@ -95,3 +95,18 @@ sigma_x0_b = sigma_y_b * sqrt((sum(time_b))/delta_b);
 sigma_y0_b = sigma_y_b * sqrt((sum(time_b))/delta_b);
 sigma_u_b = sigma_y_b * sqrt(N_b / delta_b);
 sigma_v_b = sigma_y_b * sqrt(N_b / delta_b);
+
+%general method
+% Partial derivatives for error propagation
+partial_x0_a = (u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
+partial_y0_a = (v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
+partial_u_a = (x0_b - x0_a) * (2 * (u_b - u_a)) + (y0_b - y0_a) * (v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+partial_v_a = (y0_b - y0_a) * (2 * (v_b - v_a)) + (x0_b - x0_a) * (u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+
+partial_x0_b = -(u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
+partial_y0_b = -(v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
+partial_u_b = (-(x0_b - x0_a) * (2 * (u_b - u_a)) - (y0_b - y0_a) * (v_b - v_a)) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+partial_v_b = (-(y0_b - y0_a) * (2 * (v_b - v_a)) - (x0_b - x0_a) * (u_b - u_a)) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+
+%% General method for combined uncertainty
+combined_uncertainty = sqrt((partial_x0_a * sigma_x0_a)^2 + (partial_y0_a * sigma_y0_a)^2 + (partial_u_a * sigma_u_a)^2 + (partial_v_a * sigma_v_a)^2 + (partial_x0_b * sigma_x0_b)^2 + (partial_y0_b * sigma_y0_b)^2 + (partial_u_b * sigma_u_b)^2 + (partial_v_b * sigma_v_b)^2);
