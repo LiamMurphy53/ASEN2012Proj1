@@ -1,80 +1,89 @@
-% Project 1 ASEN 2012
+%% Project 1 ASEN 2012
 clc;
 clear;
 close all;
 
-%% Read in  data files
+%% Read in data files
 % in form Time(s), X(nmi), Y(nmi)
-rawdata_A = readmatrix("Data_TCAS_A.csv");
-rawdata_B = readmatrix("Data_TCAS_B.csv");
-
+rawdata_a = readmatrix("Data_TCAS_A.csv");
+rawdata_b = readmatrix("Data_TCAS_B.csv");
 
 %% Plot the two on the same graph, without respect to time
-
 figure(1);
-plot(rawdata_A(:,2),rawdata_A(:,3));
+plot(rawdata_a(:,2), rawdata_a(:,3),'o');
 hold on;
-plot(rawdata_B(:,2),rawdata_B(:,3));
+plot(rawdata_b(:,2), rawdata_b(:,3),'o');
+title('Plane A vs Plane B Position');
 
 % fit line to data A
-[d,S] = polyfit(rawdata_A(:,2),rawdata_A(:,3),1);
-eq_A = @(x) d(1)*x+d(2);
-x = linspace(rawdata_A(1,2),rawdata_A(length(rawdata_A),2),100);
-plot(x,eq_A(x));
+[fit_a, stats_a] = polyfit(rawdata_a(:,2), rawdata_a(:,3), 1);
+eq_a = @(x) fit_a(1)*x + fit_a(2);
+x = linspace(rawdata_a(1,2), rawdata_a(length(rawdata_a),2), 100);
+plot(x, eq_a(x));
 
-%fit line to data B
-[e,T] = polyfit(rawdata_B(:,2),rawdata_B(:,3),1);
-eq_B = @(x) e(1)*x+e(2);
-x = linspace(rawdata_B(1,2),rawdata_B(length(rawdata_A),2),100);
-plot(x,eq_B(x));
+% fit line to data B
+[fit_b, stats_b] = polyfit(rawdata_b(:,2), rawdata_b(:,3), 1);
+eq_b = @(x) fit_b(1)*x + fit_b(2);
+x = linspace(rawdata_b(1,2), rawdata_b(length(rawdata_a),2), 100);
+plot(x, eq_b(x));
 
-%% find the fit lines for each aircraft, in x and y (4 lines)
-[a] = polyfit(rawdata_A(:,1),rawdata_A(:,2),1); % x
-[b] = polyfit(rawdata_A(:,1),rawdata_A(:,3),1); % y
+%% Find the fit lines for each aircraft, in x and y (4 lines)
 
-[c] = polyfit(rawdata_B(:,1),rawdata_B(:,2),1); % x
-[d] = polyfit(rawdata_B(:,1),rawdata_B(:,3),1); % y
+[a, S_a] = polyfit(rawdata_a(:,1), rawdata_a(:,2), 1); % x
+[b, S_b] = polyfit(rawdata_a(:,1), rawdata_a(:,3), 1); % y
+
+[c, S_c] = polyfit(rawdata_b(:,1), rawdata_b(:,2), 1); % x
+[d, S_d] = polyfit(rawdata_b(:,1), rawdata_b(:,3), 1); % y
+
 %% Assign the variables of the distance equation
-u_A = a(1);
-x0_A = a(2);
 
-v_A = b(1);
-y0_A = b(2);
+u_a = a(1);
+x0_a = a(2);
 
-u_B = c(1);
-x0_B = c(2);
+v_a = b(1);
+y0_a = b(2);
 
-v_B = d(1);
-y0_B = d(2);
+u_b = c(1);
+x0_b = c(2);
 
-
-
+v_b = d(1);
+y0_b = d(2);
 
 %% Use the derived closest approach equation to find time of closest approach
 
-t_ca = ( -(x0_B-x0_A)*(u_B-u_A)-(y0_B-y0_A)*(v_B-v_A) ) / ( (u_B-u_A)^(2)+(v_B-v_A)^(2) );
+t_ca = ( -(x0_b - x0_a)*(u_b - u_a) - (y0_b - y0_a)*(v_b - v_a) ) / ( (u_b - u_a)^(2) + (v_b - v_a)^(2) );
 
+%% Aircraft motion models
 
-
-%% aircraft motion models
 t = 1:1000;
 
-x_A =@(t) x0_A + u_A*t;
-y_A =@(t) y0_A + v_A*t;
+x_a = @(t) x0_a + u_a*t;
+y_a = @(t) y0_a + v_a*t;
 
-x_B =@(t) x0_B + u_B*t;
-y_B =@(t) y0_B + v_B*t;
+x_b = @(t) x0_b + u_b*t;
+y_b = @(t) y0_b + v_b*t;
+
+%% Using motion models for distance equation
+
+distance = sqrt((x_b(t_ca) - x_a(t_ca))^2 + (y_b(t_ca) - y_a(t_ca))^2); % Distance in nmi
+
+%% Error Propagation in Time of Closest Approach
+%calculating standard error for slope and intercept
+time_a = rawdata_a(:, 1);
+xi_a = rawdata_a(:,2);
+yi_a = rawdata_a(:,3);
+N_a = length(time_a);
+
+time_b = rawdata_b(:, 1);
+xi_b = rawdata_b(:,2);
+yi_b = rawdata_b(:,3);
+N_b = length(time_b);
 
 
-%% using motion models for distance equation
-
-distance = sqrt((x_B(t_ca) - x_A(t_ca))^2 + (y_B(t_ca) - y_A(t_ca))^2); %Distance in nmi
-
-%% Error Propagation in time of closest approach
 
 
-
-
-
-
+sigma_y = sqrt((1/(length(rawdata_a) - 2)) * sum((rawdata_a(:,3) - fit_a(2) - fit_a(1)*rawdata_a(:,2)).^2));
+N = length(t);
+Delta = N * sum(t.^2) - (sum(t))^2;
+sigma_X_A0 = sigma_y * sqrt(sum(t.^2) / Delta);
 
