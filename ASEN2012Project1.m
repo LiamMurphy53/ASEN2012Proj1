@@ -114,3 +114,15 @@ partial_v_b = ( (y0_b-y0_a)*(u_b-u_a)*h + g*(-2*(v_b-v_a)) ) / h^2;
 
 %% General method for combined uncertainty in tca
 uncertainty_tca = sqrt((partial_x0_a * sigma_x0_a)^2 + (partial_y0_a * sigma_y0_a)^2 + (partial_u_a * sigma_u_a)^2 + (partial_v_a * sigma_v_a)^2 + (partial_x0_b * sigma_x0_b)^2 + (partial_y0_b * sigma_y0_b)^2 + (partial_u_b * sigma_u_b)^2 + (partial_v_b * sigma_v_b)^2);
+
+
+%% TCAS Warning
+if (distance < 3.3 && distance > 2.0)
+    trafic_advisory_warning = true;
+    disp('Traffic Advisory Condition');
+elseif (distance < 2.0)
+    resolution_advisory_warning = true;
+    disp('Resolution Advisory Condition');
+else
+    disp('No Warnings');
+end
