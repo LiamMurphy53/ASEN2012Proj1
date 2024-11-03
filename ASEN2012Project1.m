@@ -116,6 +116,23 @@ partial_v_b = ( (y0_b-y0_a)*(u_b-u_a)*h + g*(-2*(v_b-v_a)) ) / h^2;
 uncertainty_tca = sqrt((partial_x0_a * sigma_x0_a)^2 + (partial_y0_a * sigma_y0_a)^2 + (partial_u_a * sigma_u_a)^2 + (partial_v_a * sigma_v_a)^2 + (partial_x0_b * sigma_x0_b)^2 + (partial_y0_b * sigma_y0_b)^2 + (partial_u_b * sigma_u_b)^2 + (partial_v_b * sigma_v_b)^2);
 
 
+%% Error Propagation in Distance of Closest Approach
+% Partial derivatives for disatnce
+partial_D_x0_a = -(x_b(t_ca) - x_a(t_ca)) / distance;
+partial_D_y0_a = -(y_b(t_ca) - y_a(t_ca)) / distance;
+partial_D_u_a = -t_ca * (x_b(t_ca) - x_a(t_ca)) / distance;
+partial_D_v_a = -t_ca * (y_b(t_ca) - y_a(t_ca)) / distance;
+
+partial_D_x0_b = (x_b(t_ca) - x_a(t_ca)) / distance;
+partial_D_y0_b = (y_b(t_ca) - y_a(t_ca)) / distance;
+partial_D_u_b = t_ca * (x_b(t_ca) - x_a(t_ca)) / distance;
+partial_D_v_b = t_ca * (y_b(t_ca) - y_a(t_ca)) / distance;
+
+% Calculate uncertainty in distance
+uncertainty_distance = sqrt((partial_D_x0_a * sigma_x0_a)^2 + (partial_D_y0_a * sigma_y0_a)^2 + (partial_D_u_a * sigma_u_a)^2 + (partial_D_v_a * sigma_v_a)^2 + (partial_D_x0_b * sigma_x0_b)^2 + (partial_D_y0_b * sigma_y0_b)^2 + (partial_D_u_b * sigma_u_b)^2 + (partial_D_v_b * sigma_v_b)^2);
+
+
+
 %% TCAS Warning
 if (distance < 3.3 && distance > 2.0)
     trafic_advisory_warning = true;
