@@ -24,7 +24,7 @@ plot(x, eq_a(x));
 % fit line to data B
 [fit_b, stats_b] = polyfit(rawdata_b(:,2), rawdata_b(:,3), 1);
 eq_b = @(x) fit_b(1)*x + fit_b(2);
-x = linspace(rawdata_b(1,2), rawdata_b(length(rawdata_a),2), 100);
+x = linspace(rawdata_b(1,2), rawdata_b(length(rawdata_b),2), 100);
 plot(x, eq_b(x));
 
 %% Find the fit lines for each aircraft, in x and y (4 lines)
@@ -82,6 +82,8 @@ N_b = length(time_b);
 delta_b = N_b * sum(time_b.^2) - (sum(time_b))^2;
 
 
+
+
 sigma_y_a = sqrt((1/(N_a - 2)) * sum((yi_a - fit_a(2) - fit_a(1) * xi_a).^2));
 sigma_y_b = sqrt((1/(N_b - 2)) * sum((yi_b - fit_b(2) - fit_b(1) * xi_b).^2));
 
@@ -97,16 +99,18 @@ sigma_u_b = sigma_y_b * sqrt(N_b / delta_b);
 sigma_v_b = sigma_y_b * sqrt(N_b / delta_b);
 
 %general method
+h = (u_b-u_a)^2 + (v_b-v_a)^2;
+g = -(y0_b-y0_a)*(v_b-v_a) - (x0_b-x0_a)*(u_b-u_a);
 % Partial derivatives for error propagation
-partial_x0_a = (u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
-partial_y0_a = (v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
-partial_u_a = -(x0_b - x0_a) * (2 * (u_b - u_a)) - (y0_b - y0_a) * (v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
-partial_v_a = -(y0_b - y0_a) * (2 * (v_b - v_a)) - (x0_b - x0_a) * (u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+partial_x0_a = (u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);%
+partial_y0_a = -(v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2); %
+partial_u_a = ((y0_b-y0_a)*(v_b-v_a)*h - g*(-2*(u_b-u_a))) / h^2;
+partial_v_a = ( -(y0_b-y0_a)*(u_b-u_a)*h + g*(-2*(v_b-v_a)) ) / h^2;
 
-partial_x0_b = -(u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
-partial_y0_b = -(v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);
-partial_u_b = (x0_b - x0_a) * (2 * (u_b - u_a)) + (y0_b - y0_a) * (v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
-partial_v_b = (y0_b - y0_a) * (2 * (v_b - v_a)) + (x0_b - x0_a) * (u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2)^2;
+partial_x0_b = -(u_b - u_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);%
+partial_y0_b = (v_b - v_a) / ((u_b - u_a)^2 + (v_b - v_a)^2);%
+partial_u_b = (-(y0_b-y0_a)*(v_b-v_a)*h + g*(-2*(u_b-u_a))) / h^2;
+partial_v_b = ( (y0_b-y0_a)*(u_b-u_a)*h + g*(-2*(v_b-v_a)) ) / h^2;
 
-%% General method for combined uncertainty
-combined_uncertainty = sqrt((partial_x0_a * sigma_x0_a)^2 + (partial_y0_a * sigma_y0_a)^2 + (partial_u_a * sigma_u_a)^2 + (partial_v_a * sigma_v_a)^2 + (partial_x0_b * sigma_x0_b)^2 + (partial_y0_b * sigma_y0_b)^2 + (partial_u_b * sigma_u_b)^2 + (partial_v_b * sigma_v_b)^2);
+%% General method for combined uncertainty in tca
+uncertainty_tca = sqrt((partial_x0_a * sigma_x0_a)^2 + (partial_y0_a * sigma_y0_a)^2 + (partial_u_a * sigma_u_a)^2 + (partial_v_a * sigma_v_a)^2 + (partial_x0_b * sigma_x0_b)^2 + (partial_y0_b * sigma_y0_b)^2 + (partial_u_b * sigma_u_b)^2 + (partial_v_b * sigma_v_b)^2);
