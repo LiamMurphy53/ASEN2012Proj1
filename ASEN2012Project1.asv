@@ -1,4 +1,16 @@
-%% Project 1 ASEN 2012
+%%
+%{
+Author: Casey Gustafson, Liam Murphy
+Assignment: Project 1 ASEN 2012
+Creation Date: 11/03/2024
+Inputs: 'Data_TCAS_A.csv','Data_TCAS_B.csv
+Outputs: Figure 1, Time of closest approach (t_ca), Distance of closest
+approach (distance), TCAS Warning, aircraft average velocities.
+Purpose: This program will take in a set of x-y position data from two
+aircraft and linearly exptrapolate the data to find the timestamp and
+distance of when the distance between them is minimized. Based off this, it
+will decide which TCAS warning to issue.
+%}
 clc;
 clear;
 close all;
@@ -116,9 +128,40 @@ partial_v_b = ( (y0_b-y0_a)*(u_b-u_a)*h + g*(-2*(v_b-v_a)) ) / h^2;
 uncertainty_tca = sqrt((partial_x0_a * sigma_x0_a)^2 + (partial_y0_a * sigma_y0_a)^2 + (partial_u_a * sigma_u_a)^2 + (partial_v_a * sigma_v_a)^2 + (partial_x0_b * sigma_x0_b)^2 + (partial_y0_b * sigma_y0_b)^2 + (partial_u_b * sigma_u_b)^2 + (partial_v_b * sigma_v_b)^2);
 
 
+%% Error Propagation in Distance of Closest Approach
+% Partial derivatives for disatnce
+partial_D_x0_a = -(x_b(t_ca) - x_a(t_ca)) / distance;
+partial_D_y0_a = -(y_b(t_ca) - y_a(t_ca)) / distance;
+partial_D_u_a = -t_ca * (x_b(t_ca) - x_a(t_ca)) / distance;
+partial_D_v_a = -t_ca * (y_b(t_ca) - y_a(t_ca)) / distance;
+
+partial_D_x0_b = (x_b(t_ca) - x_a(t_ca)) / distance;
+partial_D_y0_b = (y_b(t_ca) - y_a(t_ca)) / distance;
+partial_D_u_b = t_ca * (x_b(t_ca) - x_a(t_ca)) / distance;
+partial_D_v_b = t_ca * (y_b(t_ca) - y_a(t_ca)) / distance;
+
+% Calculate uncertainty in distance
+uncertainty_distance = sqrt((partial_D_x0_a * sigma_x0_a)^2 + (partial_D_y0_a * sigma_y0_a)^2 + (partial_D_u_a * sigma_u_a)^2 + (partial_D_v_a * sigma_v_a)^2 + (partial_D_x0_b * sigma_x0_b)^2 + (partial_D_y0_b * sigma_y0_b)^2 + (partial_D_u_b * sigma_u_b)^2 + (partial_D_v_b * sigma_v_b)^2);
+
+
+
 %% TCAS Warning
 if (distance < 3.3 && distance > 2.0)
     trafic_advisory_warning = true;
     disp('Traffic Advisory Condition');
-else if (distance < 2.0)
-     
+elseif (distance < 2.0)
+    resolution_advisory_warning = true;
+    disp('Resolution Advisory Condition');
+else
+    disp('No Warnings');
+end
+%% Reality Check: Avg Velocities of A and B
+avg_velocity_a = sqrt((a(1)*3600*1.15)^2+(b(1)*3600*1.15)^2); %Converts nmi/sec to yield mi/hr
+avg_velocity_b = sqrt((c(1)*3600*1.15)^2+(d(1)*3600*1.15)^2);
+%% Answers structure
+answers.tca = t_ca;
+answers.tca_error = uncertainty_tca
+answers.distance = distance
+answe
+
+

@@ -1,4 +1,16 @@
-%% Project 1 ASEN 2012
+%%
+%{
+Author: Casey Gustafson, Liam Murphy
+Assignment: Project 1 ASEN 2012
+Creation Date: 11/03/2024
+Inputs: 'Data_TCAS_A.csv','Data_TCAS_B.csv
+Outputs: Figure 1, Time of closest approach (t_ca), Distance of closest
+approach (distance), TCAS Warning, aircraft average velocities.
+Purpose: This program will take in a set of x-y position data from two
+aircraft and linearly exptrapolate the data to find the timestamp and
+distance of when the distance between them is minimized. Based off this, it
+will decide which TCAS warning to issue.
+%}
 clc;
 clear;
 close all;
@@ -14,6 +26,8 @@ plot(rawdata_a(:,2), rawdata_a(:,3),'o');
 hold on;
 plot(rawdata_b(:,2), rawdata_b(:,3),'o');
 title('Plane A vs Plane B Position');
+ylabel('y position (nmi)');
+xlabel('x position (nmi)');
 
 % fit line to data A
 [fit_a, stats_a] = polyfit(rawdata_a(:,2), rawdata_a(:,3), 1);
@@ -143,3 +157,13 @@ elseif (distance < 2.0)
 else
     disp('No Warnings');
 end
+%% Reality Check: Avg Velocities of A and B
+avg_velocity_a = sqrt((a(1)*3600*1.15)^2+(b(1)*3600*1.15)^2); %Converts nmi/sec to yield mi/hr
+avg_velocity_b = sqrt((c(1)*3600*1.15)^2+(d(1)*3600*1.15)^2);
+%% Answers structure
+answers.tca = t_ca;
+answers.tca_error = uncertainty_tca;
+answers.min_distance = distance;
+answers.distance_error = uncertainty_distance;
+disp(answers);
+
